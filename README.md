@@ -65,5 +65,15 @@ jdbc:h2:tcp://<ip-address>:<port>/node
 
 4. Далее необходимо используя команды из web-браузера (в контроллерах указаны пути запроса) или мобильного приложения управлять действиями 4 узлов
 
+Если у вас возникнет ошибка 
+```
+Error: Could not find or load main class com.whizzband.webapplication.WebapplicationApplication
+```
+Следует проверить настройки базового класса или открыть файл 
+```
+..\loyalty-system\src\main\java\com\whizzband\webapplication\WebapplicationApplication.java
+```
+И слева в IDE будет значок запуска
+
 ## Лицензия
 Loyalty-system под лицензией [MIT License](https://github.com/vladimirevsin/loyalty-system/blob/master/LICENSE)
