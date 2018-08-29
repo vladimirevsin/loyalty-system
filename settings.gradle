@@ -1,0 +1,4 @@
+rootProject.name = 'webapplication'
+include 'cordapp'
+include 'cordapp-contract-state'
+

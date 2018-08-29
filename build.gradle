@@ -1,0 +1,176 @@
+buildscript {
+	ext {
+		springBootVersion = '2.0.4.RELEASE'
+		corda_release_version = '3.1-corda'
+		corda_release_group = 'net.corda'
+		corda_gradle_plugins_version = '3.1.0'
+
+	}
+	repositories {
+		mavenCentral()
+		maven { url "https://repo.spring.io/snapshot" }
+		maven { url "https://repo.spring.io/milestone" }
+	}
+	dependencies {
+		classpath("org.springframework.boot:spring-boot-gradle-plugin:${springBootVersion}")
+		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:1.1.60"
+		classpath "net.corda.plugins:cordapp:3.1.0"
+		classpath "net.corda.plugins:cordformation:3.1.0"
+		classpath "net.corda.plugins:quasar-utils:3.1.0"
+	}
+}
+
+apply plugin: 'kotlin'
+apply plugin: 'java'
+apply plugin: 'eclipse'
+apply plugin: 'org.springframework.boot'
+apply plugin: 'io.spring.dependency-management'
+apply plugin: 'net.corda.plugins.cordapp'
+apply plugin: 'net.corda.plugins.cordformation'
+
+group = 'com.whizzband'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+	mavenCentral()
+}
+
+
+dependencies {
+	compile 'net.corda:corda-node-api:3.1-corda'
+	compile 'net.corda:corda:3.1-corda'
+
+	compile('org.springframework.boot:spring-boot-starter-security')
+	compile('org.springframework.boot:spring-boot-starter-thymeleaf')
+	compile('org.springframework.boot:spring-boot-starter-web')
+	compile group: 'net.corda', name: 'corda-rpc', version: '3.1-corda'
+
+	cordaCompile "$corda_release_group:corda-core:$corda_release_version"
+	cordaCompile "$corda_release_group:corda-finance:corda-3.0"
+	cordaCompile "$corda_release_group:corda-jackson:$corda_release_version"
+	cordaCompile "$corda_release_group:corda-rpc:$corda_release_version"
+	cordaCompile "$corda_release_group:corda-node-api:$corda_release_version"
+	cordaRuntime "$corda_release_group:corda:$corda_release_version"
+
+//	testCompile('org.springframework.boot:spring-boot-starter-test')
+//	testCompile('org.springframework.security:spring-security-test')
+
+	cordapp project(":cordapp")
+	cordapp project(":cordapp-contract-state")
+	cordapp "$corda_release_group:corda-finance:corda-3.0"
+}
+
+tasks.withType(JavaCompile) {
+	options.compilerArgs << "-parameters" // Required for shell commands.
+}
+
+tasks.withType(org.jetbrains.kotlin.gradle.tasks.KotlinCompile).all {
+	kotlinOptions {
+		languageVersion = "1.1"
+		apiVersion = "1.1"
+		jvmTarget = "1.8"
+		javaParameters = true   // Useful for reflection.
+	}
+}
+
+task deployNodes(type: net.corda.plugins.Cordform, dependsOn: ['jar']) {
+	directory "./build/nodes"
+	node {
+		name "O=Notary,L=Moscow,C=RU"
+		notary = [validating : true]
+		p2pPort 10002
+
+		cordapps = [
+				"$project.group:cordapp-contracts-states:$project.version",
+				"$project.group:cordapp:$project.version",
+				"$corda_release_group:corda-finance:$corda_release_version"
+		]
+	}
+	node {
+		name "O=Bank,L=Moscow,C=RU"
+		p2pPort 10005
+		rpcSettings {
+			address("localhost:10006")
+			adminAddress("localhost:10046")
+		}
+
+		cordapps = [
+				"$project.group:cordapp-contracts-states:$project.version",
+				"$project.group:cordapp:$project.version",
+				"$corda_release_group:corda-finance:$corda_release_version"
+		]
+
+		rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
+	}
+
+	node {
+		name "O=Pyaterochka,L=Moskow,C=GB"
+		p2pPort 10008
+		rpcSettings {
+			address("localhost:10009")
+			adminAddress("localhost:10047")
+		}
+
+		cordapps = [
+				"$project.group:cordapp-contracts-states:$project.version",
+				"$project.group:cordapp:$project.version",
+				"$corda_release_group:corda-finance:$corda_release_version"
+		]
+
+		rpcUsers = [[ user: "user1", "password": "test", "permissions": ["ALL"]]]
+	}
+
+	node {
+		name "O=Clients,L=Rostov-on-Don,C=RU"
+		p2pPort 10010
+		rpcSettings {
+			address("localhost:10011")
+			adminAddress("localhost:10048")
+		}
+
+		cordapps = [
+				"$project.group:cordapp-contracts-states:$project.version",
+				"$project.group:cordapp:$project.version",
+				"$corda_release_group:corda-finance:$corda_release_version"
+		]
+
+		rpcUsers = [[ user: "client", "password": "client", "permissions": ["ALL"]]]
+	}
+//
+//
+//	node {
+//		name "O=Perekrestok,L=Moskow,C=RU"
+//		p2pPort 10012
+//		rpcSettings {
+//			address("localhost:10013")
+//			adminAddress("localhost:10049")
+//		}
+//
+//		cordapps = [
+//				"$project.group:cordapp-contracts-states:$project.version",
+//				"$project.group:cordapp:$project.version",
+//				"$corda_release_group:corda-finance:$corda_release_version"
+//		]
+//
+//		rpcUsers = [[ user: "perecrestok", "password": "perecrestok", "permissions": ["ALL"]]]
+//	}
+//
+//	node {
+//		name "O=Market,L=Moskow,C=RU"
+//		p2pPort 10014
+//		rpcSettings {
+//			address("localhost:10015")
+//			adminAddress("localhost:10050")
+//		}
+//
+//		cordapps = [
+//				"$project.group:cordapp-contracts-states:$project.version",
+//				"$project.group:cordapp:$project.version",
+//				"$corda_release_group:corda-finance:$corda_release_version"
+//		]
+//
+//		rpcUsers = [[ user: "perecrestok", "password": "perecrestok", "permissions": ["ALL"]]]
+//	}
+}
