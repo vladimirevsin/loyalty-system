@@ -9,4 +9,4 @@
 * IntelliJ IDEA with Gradle для расрешения всех зависимостей и запуска узлов узлов сети  
 
 ## Лицензия
-Loyalty-system под лицензией [MIT License](loyalty-system/LICENSE)
+Loyalty-system под лицензией [MIT License](https://github.com/vladimirevsin/loyalty-system/blob/master/LICENSE)
