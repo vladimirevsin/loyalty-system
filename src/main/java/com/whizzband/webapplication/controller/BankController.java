@@ -56,7 +56,7 @@ public class BankController {
     public ResultData saleTokenTSC(/*SeilTokenModel seilTokenModel*/) {
         SaleTokenModel saleTokenModel = new SaleTokenModel(
                 new CordaX500Name("Pyaterochka", "Moskow", "GB"),
-                12.0,
+                120000.0,
                 1
         );
         try {
@@ -83,7 +83,7 @@ public class BankController {
             "-",
             1,
             UUID.randomUUID(),
-            1.6, 1.2, 1000.0
+            0.016, 0.02, 1000.0
         );
         final Party tscParty = proxy.wellKnownPartyFromX500Name(tsc.getPartnerParty());
 
@@ -114,6 +114,14 @@ public class BankController {
         } catch (Exception ex) {
             return new ResultData(EnumError.INNER_ERROR.getCode(), ex.getMessage());
         }
+    }
+
+    @GetMapping("/install_begin")
+    public ResultData installBegin() {
+        regAlliance();
+        regPartner();
+        saleTokenTSC();
+        return new ResultData(0, "Ok");
     }
 
 

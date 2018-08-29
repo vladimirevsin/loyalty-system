@@ -117,6 +117,19 @@ public class TSCController {
 
     }
 
+    @GetMapping("/get_balance_tsc")
+    public Wallet getBalance() {
+        try {
+
+            final FlowProgressHandle<Wallet> walletFlowProgressHandle = proxy.startTrackedFlowDynamic(GetBalanceTSC.Initiator.class);
+            final Wallet addWallet = walletFlowProgressHandle.getReturnValue().get();
+
+            return addWallet;
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
     @GetMapping("/get_client")
     public List<Client> getClient() {
         final CordaX500Name tscCordaX500Name = new CordaX500Name(

@@ -19,6 +19,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
@@ -74,8 +75,8 @@ public class ClientController {
         }
     }
 
-    @GetMapping("/get_balance")
-    public Double getBalance(String phoneNumber, int marker) {
+    @GetMapping("/get_balance05")
+    public Double getBalance05(String phoneNumber, int marker) {
         try {
 
             final FlowProgressHandle<Double> flowProgressHandle = proxy.startTrackedFlowDynamic(GetBalance.Initiator.class,
@@ -87,6 +88,21 @@ public class ClientController {
             return null;
         }
     }
+
+    @GetMapping("/get_balance_client")
+    public List<Wallet> getBalance(String phoneNumber) {
+        try {
+            if (phoneNumber.charAt(0) == ' ') phoneNumber = "+".concat(phoneNumber.substring(1));
+            final FlowProgressHandle<TransactionResultData> transactionResultDataFlowProgressHandle = proxy.startTrackedFlowDynamic(GetBalanceClient.Initiator.class,
+                    phoneNumber);
+            final TransactionResultData addWallet = transactionResultDataFlowProgressHandle.getReturnValue().get();
+
+            return addWallet.getWallets();
+        } catch (Exception ex) {
+            return null;
+        }
+    }
+
 
     @GetMapping("/search_client")
     public ResultDataSearchClient searchClient(String phoneNumber, String password) {
